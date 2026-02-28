@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -e
+
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Detect OS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  OS="mac"
+elif [[ -f /etc/os-release ]]; then
+  OS="linux"
+fi
+
+if [[ "$OS" == "mac" ]]; then
+  command -v brew &>/dev/null ||
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  brew update --quiet
+  brew install fzf ripgrep bat eza zoxide tldr 2>/dev/null ||
+    brew upgrade fzf ripgrep bat eza zoxide tldr 2>/dev/null || true
+else
+  sudo apt-get update -qq
+  sudo apt-get install -y fzf ripgrep bat zoxide tldr
+
+  # if bat binary is called batcat on Ubuntu aliases it
+  if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
+    mkdir -p ~/.local/bin && ln -sf "$(command -v batcat)" ~/.local/bin/bat
+  fi
+
+  curl -Lo /tmp/eza.tar.gz \
+    https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz
+  tar -xzf /tmp/eza.tar.gz -C /tmp && sudo mv /tmp/eza /usr/local/bin/eza
+  rm /tmp/eza.tar.gz
+fi
+
+if [[ -d "$HOME/.oh-my-zsh" ]]; then
+  "$HOME/.oh-my-zsh/tools/upgrade.sh" 2>/dev/null || true
+else
+  RUNZSH=no KEEP_ZSHRC=yes \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+# OMZ plugins
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+for plugin in zsh-users/zsh-autosuggestions zsh-users/zsh-syntax-highlighting; do
+  name="${plugin##*/}"
+  dest="$ZSH_CUSTOM/plugins/$name"
+  [[ -d "$dest" ]] && git -C "$dest" pull --quiet ||
+    git clone --depth=1 "https://github.com/$plugin" "$dest"
+done
+
+# p10k
+P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+[[ -d "$P10K" ]] && git -C "$P10K" pull --quiet ||
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k "$P10K"
+
+ln -sf "$DOTFILES/zsh/.zshrc" "$HOME/.zshrc"
+ln -sf "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
+ln -sf "$DOTFILES/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+
+echo "Installed! Restart terminal or run: source ~/.zshrc"

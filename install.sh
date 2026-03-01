@@ -14,11 +14,11 @@ if [[ "$OS" == "mac" ]]; then
   command -v brew &>/dev/null ||
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   brew update --quiet
-  brew install fzf ripgrep bat eza zoxide tldr 2>/dev/null ||
-    brew upgrade fzf ripgrep bat eza zoxide tldr 2>/dev/null || true
+  brew install fzf ripgrep bat eza zoxide tldr git-delta 2>/dev/null ||
+    brew upgrade fzf ripgrep bat eza zoxide tldr git-delta 2>/dev/null || true
 else
   sudo apt-get update -qq
-  sudo apt-get install -y fzf ripgrep bat zoxide tldr
+  sudo apt-get install -y fzf ripgrep bat zoxide tldr git-delta
 
   # if bat binary is called batcat on Ubuntu aliases it
   if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
@@ -55,5 +55,6 @@ P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 ln -sf "$DOTFILES/zsh/.zshrc" "$HOME/.zshrc"
 ln -sf "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
 ln -sf "$DOTFILES/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+ln -sf "$DOTFILES/git/.gitconfig" "$HOME/.gitconfig"
 
 echo "Installed! Restart terminal or run: source ~/.zshrc"

@@ -1,0 +1,15 @@
+[core]
+  pager = delta
+
+[delta]
+  features = side-by-side line-numbers
+  hunk-header-decoration-style = none
+
+[merge]
+  conflictstyle = diff3
+
+[diff]
+  colorMoved = default
+[user]
+	email = ramorstem2022@gmail.com
+	name = Andre Amor

@@ -18,7 +18,16 @@ if [[ "$OS" == "mac" ]]; then
     brew upgrade fzf ripgrep bat eza zoxide tldr git-delta 2>/dev/null || true
 else
   sudo apt-get update -qq
-  sudo apt-get install -y fzf ripgrep bat zoxide tldr git-delta
+  sudo apt-get install -y fzf ripgrep bat zoxide tldr
+
+  # git-delta is not in Ubuntu Jammy, install from GitHub
+  if ! command -v delta &>/dev/null; then
+    DELTA_VER=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep -Po '"tag_name": "\K[^"]+')
+    curl -Lo /tmp/git-delta.deb \
+      "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/git-delta_${DELTA_VER}_amd64.deb"
+    sudo dpkg -i /tmp/git-delta.deb
+    rm /tmp/git-delta.deb
+  fi
 
   # if bat binary is called batcat on Ubuntu aliases it
   if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then

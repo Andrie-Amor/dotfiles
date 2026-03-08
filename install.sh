@@ -14,8 +14,8 @@ if [[ "$OS" == "mac" ]]; then
   command -v brew &>/dev/null ||
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   brew update --quiet
-  brew install fzf ripgrep bat eza zoxide tldr git-delta 2>/dev/null ||
-    brew upgrade fzf ripgrep bat eza zoxide tldr git-delta 2>/dev/null || true
+  brew install fzf ripgrep bat eza zoxide tldr git-delta neovim 2>/dev/null ||
+    brew upgrade fzf ripgrep bat eza zoxide tldr git-delta neovim 2>/dev/null || true
 else
   command -v brew &>/dev/null || {
     NONINTERACTIVE=1 \
@@ -24,8 +24,8 @@ else
 
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   brew update --quiet
-  brew install fzf ripgrep bat eza zoxide tldr git-delta 2>/dev/null ||
-    brew upgrade fzf ripgrep bat eza zoxide tldr git-delta 2>/dev/null || true
+  brew install fzf ripgrep bat eza zoxide tldr git-delta neovim 2>/dev/null ||
+    brew upgrade fzf ripgrep bat eza zoxide tldr git-delta neovim 2>/dev/null || true
 fi
 
 if [[ -d "$HOME/.oh-my-zsh" ]]; then
@@ -49,9 +49,21 @@ P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 [[ -d "$P10K" ]] && git -C "$P10K" pull --quiet ||
   git clone --depth=1 https://github.com/romkatv/powerlevel10k "$P10K"
 
+# Make sure the nvim submodule is current
+git -C "$DOTFILES" submodule update --init --recursive --remote nvim
+
+mkdir -p "$HOME/.config"
+if [[ -e "$HOME/.config/nvim" && ! -L "$HOME/.config/nvim" ]]; then
+  rm -rf "$HOME/.config/nvim"
+fi
+if [[ -L "$HOME/.config/nvim" ]]; then
+  rm -f "$HOME/.config/nvim"
+fi
+
 ln -sf "$DOTFILES/zsh/.zshrc" "$HOME/.zshrc"
 ln -sf "$DOTFILES/zsh/.zshenv" "$HOME/.zshenv"
 ln -sf "$DOTFILES/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 ln -sf "$DOTFILES/git/.gitconfig" "$HOME/.gitconfig"
+ln -sf "$DOTFILES/nvim" "$HOME/.config/nvim"
 
 echo "Installed! Restart terminal or run: source ~/.zshrc"
